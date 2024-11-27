@@ -16,29 +16,25 @@ class Accelerator extends Module {
   val xReg = Reg(UInt (16.W))
   val yReg = Reg(UInt (16.W))
   val addressReg = Reg(UInt (16.W))
-  val dataReg = Reg(UInt (32.W))
 
   // Defining states
-  val idle :: done :: init :: outerLoop :: border :: erode :: pixelRead :: rightRead :: leftRead :: upRead :: downRead :: white :: increment :: Nil = Enum (13)
+  val idle :: done :: outerLoop :: border :: erode :: pixelRead :: rightRead :: leftRead :: upRead :: downRead :: white :: increment :: Nil = Enum (12)
 
   val stateReg = RegInit(idle)
 
   //Default values
   io.writeEnable := false.B
-  io.dataWrite := dataReg
+  io.dataWrite := 0.U
   io.address := 0.U
   io.done := false.B
 
   switch(stateReg) {
     is(idle) {
       when(io.start) {
-        stateReg := init
+        xReg := 0.U
+        yReg := 0.U
+        stateReg := outerLoop
       }
-    }
-    is(init) {
-      xReg := 0.U
-      yReg := 0.U
-      stateReg := outerLoop
     }
     is(outerLoop) {
       when (xReg < 20.U) {
@@ -57,8 +53,7 @@ class Accelerator extends Module {
     }
     is(pixelRead) {
       io.address := addressReg
-      dataReg := io.dataRead
-      when (dataReg === 255.U) {
+      when (io.dataRead === 255.U) {
         stateReg := rightRead
       } .otherwise {
         stateReg := erode
@@ -66,8 +61,7 @@ class Accelerator extends Module {
     }
     is(rightRead) {
       io.address := addressReg + 1.U
-      dataReg := io.dataRead
-      when (dataReg === 255.U) {
+      when (io.dataRead === 255.U) {
         stateReg := leftRead
       } .otherwise {
         stateReg := erode
@@ -75,8 +69,7 @@ class Accelerator extends Module {
     }
     is(leftRead) {
       io.address := addressReg - 1.U
-      dataReg := io.dataRead
-      when (dataReg === 255.U) {
+      when (io.dataRead === 255.U) {
         stateReg := upRead
       } .otherwise {
         stateReg := erode
@@ -84,8 +77,7 @@ class Accelerator extends Module {
     }
     is(upRead) {
       io.address := addressReg + 20.U
-      dataReg := io.dataRead
-      when (dataReg === 255.U) {
+      when (io.dataRead === 255.U) {
         stateReg := downRead
       } .otherwise {
         stateReg := erode
@@ -93,8 +85,7 @@ class Accelerator extends Module {
     }
     is(downRead) {
       io.address := addressReg - 20.U
-      dataReg := io.dataRead
-      when (dataReg === 255.U) {
+      when (io.dataRead === 255.U) {
         stateReg := white
       } .otherwise {
         stateReg := erode
@@ -103,13 +94,13 @@ class Accelerator extends Module {
     is(white) {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
-      io.dataWrite := 255.U(32.W)
+      io.dataWrite := 255.U
       stateReg := increment
     }
     is(erode) {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
-      io.dataWrite := 0.U(32.W)
+      io.dataWrite := 0.U
       stateReg := increment
     }
     is(increment) {
