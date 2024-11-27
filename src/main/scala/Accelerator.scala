@@ -63,6 +63,7 @@ class Accelerator extends Module {
     }
     is(rightRead) {
       io.address := addressReg + 1.U
+      dataReg := io.dataRead
       when (dataReg === 255.U) {
         stateReg := leftRead
       } .otherwise {
@@ -71,6 +72,7 @@ class Accelerator extends Module {
     }
     is(leftRead) {
       io.address := addressReg - 1.U
+      dataReg := io.dataRead
       when (dataReg === 255.U) {
         stateReg := upRead
       } .otherwise {
@@ -79,6 +81,7 @@ class Accelerator extends Module {
     }
     is(upRead) {
       io.address := addressReg + 20.U
+      dataReg := io.dataRead
       when (dataReg === 255.U) {
         stateReg := downRead
       } .otherwise {
@@ -87,6 +90,7 @@ class Accelerator extends Module {
     }
     is(downRead) {
       io.address := addressReg - 20.U
+      dataReg := io.dataRead
       when (dataReg === 255.U) {
         stateReg := white
       } .otherwise {
@@ -96,12 +100,13 @@ class Accelerator extends Module {
     is(white) {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
+      io.dataWrite := 255.U(32.W)
       stateReg := increment
     }
     is(erode) {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
-      dataReg := 0.U
+      io.dataWrite := 0.U(32.W)
       stateReg := increment
     }
     is(increment) {
