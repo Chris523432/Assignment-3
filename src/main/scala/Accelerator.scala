@@ -12,15 +12,18 @@ class Accelerator extends Module {
     val dataWrite = Output(UInt (32.W))
 
   })
+  //Registers
   val xReg = Reg(UInt (16.W))
   val yReg = Reg(UInt (16.W))
   val addressReg = Reg(UInt (16.W))
   val dataReg = Reg(UInt (32.W))
 
-  val idle :: read :: write :: done :: init :: outerLoop :: border :: erode :: pixelRead :: rightRead :: leftRead :: upRead :: downRead :: white :: increment :: Nil = Enum (15)
+  // Defining states
+  val idle :: done :: init :: outerLoop :: border :: erode :: pixelRead :: rightRead :: leftRead :: upRead :: downRead :: white :: increment :: Nil = Enum (13)
 
   val stateReg = RegInit(idle)
 
+  //Default values
   io.writeEnable := false.B
   io.dataWrite := dataReg
   io.address := 0.U
