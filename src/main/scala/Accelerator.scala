@@ -41,6 +41,7 @@ class Accelerator extends Module {
         addressReg := xReg
         stateReg := border
       } .otherwise {
+        io.done := true.B
         stateReg := done
       }
     }
@@ -95,16 +96,17 @@ class Accelerator extends Module {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
       io.dataWrite := 255.U
+      yReg := yReg + 1.U
       stateReg := increment
     }
     is(erode) {
       io.writeEnable := true.B
       io.address := addressReg + 400.U
       io.dataWrite := 0.U
+      yReg := yReg + 1.U
       stateReg := increment
     }
     is(increment) {
-      yReg := yReg + 1.U
       when(yReg < 20.U) {
         addressReg := addressReg + 20.U
         stateReg := border
@@ -115,7 +117,6 @@ class Accelerator extends Module {
       }
     }
     is(done) {
-      io.done := true.B
     }
   }
 }
